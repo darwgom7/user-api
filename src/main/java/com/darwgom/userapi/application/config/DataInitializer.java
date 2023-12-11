@@ -1,7 +1,7 @@
 package com.darwgom.userapi.application.config;
 
 import com.darwgom.userapi.domain.entities.Role;
-import com.darwgom.userapi.domain.enums.RoleName;
+import com.darwgom.userapi.domain.enums.RoleNameEnum;
 import com.darwgom.userapi.domain.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,7 +14,7 @@ public class DataInitializer {
     private RoleRepository roleRepository;
     @EventListener(ApplicationReadyEvent.class)
     public void initData() {
-        for (RoleName roleName : RoleName.values()) {
+        for (RoleNameEnum roleName : RoleNameEnum.values()) {
             roleRepository.findByName(roleName)
                     .orElseGet(() -> roleRepository.save(new Role(roleName)));
         }

@@ -16,6 +16,12 @@ spring:
 logging:
   level:
     root: INFO
+    org:
+      springframework:
+        security: DEBUG
 
 server:
   port: 8080
+
+jwt:
+  secret: CABD8E152F81B8FBEBB3885B66E16A9085E1B67180D43738D2E969573D35D4F2

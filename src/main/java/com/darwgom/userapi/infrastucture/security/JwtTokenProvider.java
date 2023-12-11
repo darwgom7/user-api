@@ -1,29 +1,32 @@
 package com.darwgom.userapi.infrastucture.security;
 import com.darwgom.userapi.domain.entities.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 
 @Component
 public class JwtTokenProvider {
 
-    private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Autowired
+    private SecretKey key;
 
-    private final long validityInMilliseconds = 3600000;
+    //private final long validityInMilliseconds = 3600000;
+    private final long validityInMilliseconds = 120000;
 
-    public String createToken(String email, Set<Role> roles) {
-        System.out.println(key);
+
+    public String createToken(String email, Collection<? extends GrantedAuthority> authorities) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles.stream().map(Role::getName).collect(Collectors.toList()));
+        claims.put("roles", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -43,5 +46,19 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getId();
+    }
+
+    public Boolean isTokenExpired(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return true;
+        }
     }
 }

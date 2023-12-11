@@ -1,6 +1,6 @@
 package com.darwgom.userapi.domain.entities;
 
-import com.darwgom.userapi.domain.enums.RoleName;
+import com.darwgom.userapi.domain.enums.RoleNameEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,9 +23,9 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private RoleName name;
+    private RoleNameEnum name;
 
-    public Role(RoleName name) {
+    public Role(RoleNameEnum name) {
         this.name = name;
     }
 }

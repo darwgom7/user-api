@@ -14,9 +14,10 @@ public class UserDTO {
     private Long id;
     private String email;
     private Set<PhoneDTO> phones;
+    private RoleDTO role;
     private LocalDateTime created;
     private LocalDateTime modified;
     private LocalDateTime lastLogin;
-    private boolean isActive;
+    private Boolean isActive;
     private String token;
 }
