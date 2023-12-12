@@ -7,12 +7,13 @@ import com.darwgom.userapi.application.dto.UserInputDTO;
 import com.darwgom.userapi.application.dto.UserDeleteDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserUseCase {
     UserDTO registerUser(UserInputDTO userInputDTO);
     TokenDTO loginUser(LoginDTO loginDTO);
     List<UserDTO> getAllUsers();
-    UserDTO getUserById(Long userId);
-    UserDTO updateUser(Long userId, UserInputDTO userInputDTO);
-    UserDeleteDTO deleteUser(Long userId);
+    UserDTO getUserById(UUID userId);
+    UserDTO updateUser(UUID userId, UserInputDTO userInputDTO);
+    UserDeleteDTO deleteUser(UUID userId);
 }

@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,11 +23,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "phones")
 public class Phone {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(unique = true)
+    @Id
+    @GeneratedValue(generator = "UUID")
+    private UUID id;
+
     private String number;
 
     @Column(name = "city_code")

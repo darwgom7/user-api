@@ -7,15 +7,20 @@ import com.darwgom.userapi.domain.entities.Phone;
 import com.darwgom.userapi.domain.entities.Role;
 import com.darwgom.userapi.domain.entities.User;
 import com.darwgom.userapi.domain.enums.RoleNameEnum;
+import com.darwgom.userapi.domain.exceptions.EmailAlreadyRegisteredException;
+import com.darwgom.userapi.domain.exceptions.UserNotFoundException;
 import com.darwgom.userapi.domain.repositories.RoleRepository;
 import com.darwgom.userapi.domain.repositories.UserRepository;
 import com.darwgom.userapi.infrastucture.security.JwtTokenProvider;
+import com.darwgom.userapi.utilities.EmailFormatValidator;
+import com.darwgom.userapi.utilities.PasswordValidator;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +35,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Service
 @EnableCaching
 public class UserUseCaseImpl implements UserUseCase {
@@ -55,6 +62,7 @@ public class UserUseCaseImpl implements UserUseCase {
     public UserDTO registerUser(UserInputDTO userInputDTO) {
 
         User user = modelMapper.map(userInputDTO, User.class);
+        PasswordValidator.validatePassword(userInputDTO.getPassword());
         user.setPassword(passwordEncoder.encode(userInputDTO.getPassword()));
 
         user.setIsActive(Boolean.TRUE);
@@ -68,12 +76,17 @@ public class UserUseCaseImpl implements UserUseCase {
         user.setPhones(phoneEntities);
         user.getPhones().forEach(phone -> phone.setUser(user));
 
+        EmailFormatValidator.validEmailFormat(userInputDTO.getEmail());
+
+        if (userRepository.findByEmail(userInputDTO.getEmail()).isPresent()) {
+            throw new EmailAlreadyRegisteredException(userInputDTO.getEmail());
+        }
+
         RoleNameEnum roleNameEnum = RoleNameEnum.valueOf(userInputDTO.getRole().toUpperCase());
         Role role = roleRepository.findByName(roleNameEnum)
                 .orElseThrow(() -> new IllegalStateException("Role not found: " + userInputDTO.getRole()));
         user.setRole(role);
 
-        System.out.println("::::Role:::: " + user.getRole().getName().name());
         GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName().name());
 
         String token = jwtTokenProvider.createToken(user.getEmail(), Collections.singletonList(authority));
@@ -132,14 +145,14 @@ public class UserUseCaseImpl implements UserUseCase {
     }
 
     @Override
-    public UserDTO getUserById(Long userId) {
+    public UserDTO getUserById(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
         return modelMapper.map(user, UserDTO.class);
     }
 
     @Override
-    public UserDTO updateUser(Long userId, UserInputDTO userInputDTO) {
+    public UserDTO updateUser(UUID userId, UserInputDTO userInputDTO) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
@@ -173,9 +186,9 @@ public class UserUseCaseImpl implements UserUseCase {
     }
 
     @Override
-    public UserDeleteDTO deleteUser(Long userId) {
+    public UserDeleteDTO deleteUser(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         userRepository.delete(user);
         return new UserDeleteDTO(true, "User deleted successfully");
     }

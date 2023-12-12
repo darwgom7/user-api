@@ -25,3 +25,11 @@ server:
 
 jwt:
   secret: CABD8E152F81B8FBEBB3885B66E16A9085E1B67180D43738D2E969573D35D4F2
+  validityInMilliseconds: 120000 # 3600000
+
+password:
+  pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{6,}$"
+
+spring-doc:
+  api-docs:
+    path: /api-docs

@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = {"*"})
@@ -26,7 +28,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> loginUser(@RequestBody LoginDTO loginDTO) {
         TokenDTO tokenDTO = userUseCase.loginUser(loginDTO);
-        return ResponseEntity.ok(tokenDTO);
+        return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
     }
 
     @GetMapping
@@ -36,21 +38,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
         UserDTO userDTO = userUseCase.getUserById(id);
-        return ResponseEntity.ok(userDTO);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long userId, @RequestBody UserInputDTO userInputDTO) {
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID userId, @RequestBody UserInputDTO userInputDTO) {
         UserDTO updatedUser = userUseCase.updateUser(userId, userInputDTO);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserDeleteDTO> deleteUser(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserDeleteDTO> deleteUser(@PathVariable UUID id) {
         UserDeleteDTO response = userUseCase.deleteUser(id);
-        return ResponseEntity.ok(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }

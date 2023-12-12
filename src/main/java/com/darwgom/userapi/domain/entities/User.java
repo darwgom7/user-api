@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -20,8 +21,8 @@ import java.util.HashSet;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String email;

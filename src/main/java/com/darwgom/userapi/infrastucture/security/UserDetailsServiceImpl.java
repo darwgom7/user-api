@@ -26,15 +26,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.darwgom.userapi.domain.entities.User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName().name());
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().getName().name());
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(Collections.singletonList(authority))
                 .build();
     }
-
 
     private Collection<? extends GrantedAuthority> convertRolesToAuthorities(Set<Role> roles) {
         return roles.stream()

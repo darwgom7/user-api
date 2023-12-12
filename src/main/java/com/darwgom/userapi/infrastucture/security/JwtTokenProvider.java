@@ -2,6 +2,7 @@ package com.darwgom.userapi.infrastucture.security;
 import com.darwgom.userapi.domain.entities.Role;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,12 @@ public class JwtTokenProvider {
     @Autowired
     private SecretKey key;
 
-    //private final long validityInMilliseconds = 3600000;
-    private final long validityInMilliseconds = 120000;
+    @Value("${jwt.validityInMilliseconds}")
+    private long validityInMilliseconds;
 
 
     public String createToken(String email, Collection<? extends GrantedAuthority> authorities) {
+
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", authorities.stream()
                 .map(GrantedAuthority::getAuthority)
